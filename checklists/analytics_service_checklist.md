@@ -9,9 +9,9 @@
 ## Phát triển Core Components
 - [x] Thiết lập project structure (FastAPI với Pandas/NumPy)
 - [x] Xây dựng pipeline ETL
-- [ ] Xây dựng cơ chế aggregation nâng cao
-- [ ] Xây dựng cơ chế data normalization
-- [ ] Xây dựng cơ chế data visualization
+- [x] Xây dựng cơ chế aggregation nâng cao
+- [x] Xây dựng cơ chế data normalization
+- [x] Xây dựng cơ chế data visualization
 
 ## Phát triển API
 - [x] Phát triển API endpoint cho KPI dashboard
