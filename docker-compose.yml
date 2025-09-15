@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Databases
+  mongodb:
+    image: mongo:latest
+    container_name: ticket-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    networks:
+      - ticket-network
+
+  postgres:
+    image: postgres:latest
+    container_name: ticket-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=users
+    networks:
+      - ticket-network
+
+  # Support Services
+  redis:
+    image: redis:latest
+    container_name: ticket-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ticket-network
+
+  # API Gateway - Uncomment when ready to deploy
+  # api-gateway:
+  #   build:
+  #     context: ./services/api-gateway
+  #     dockerfile: Dockerfile
+  #   container_name: ticket-api-gateway
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - ticket-network
+
+  # User Service - Uncomment when ready to deploy
+  # user-service:
+  #   build:
+  #     context: ./services/user-service
+  #     dockerfile: Dockerfile
+  #   container_name: ticket-user-service
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - ticket-network
+
+  # Ticket Service - Uncomment when ready to deploy
+  # ticket-service:
+  #   build:
+  #     context: ./services/ticket-service
+  #     dockerfile: Dockerfile
+  #   container_name: ticket-ticket-service
+  #   depends_on:
+  #     - mongodb
+  #   networks:
+  #     - ticket-network
+
+networks:
+  ticket-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  postgres_data:
