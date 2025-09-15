@@ -40,42 +40,132 @@ services:
     networks:
       - ticket-network
 
-  # API Gateway - Uncomment when ready to deploy
-  # api-gateway:
-  #   build:
-  #     context: ./services/api-gateway
-  #     dockerfile: Dockerfile
-  #   container_name: ticket-api-gateway
-  #   ports:
-  #     - "8000:8000"
-  #   env_file:
-  #     - ./config/database.env
-  #   depends_on:
-  #     - redis
-  #   networks:
-  #     - ticket-network
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: ticket-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080
+      - JWT_SECRET=your-secret-key-for-jwt
+      - USER_SERVICE_URL=http://user-service:8000
+      - TICKET_SERVICE_URL=http://ticket-service:8001
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+    depends_on:
+      - redis
+      - user-service
+      - ticket-service
+    networks:
+      - ticket-network
+    restart: unless-stopped
 
-  # User Service - Uncomment when ready to deploy
-  # user-service:
-  #   build:
-  #     context: ./services/user-service
-  #     dockerfile: Dockerfile
-  #   container_name: ticket-user-service
-  #   env_file:
-  #     - ./config/database.env
-  #   networks:
-  #     - ticket-network
+  # User Service
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: ticket-user-service
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=14.161.50.86
+      - POSTGRES_PORT=25432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=users
+      - JWT_SECRET=your-secret-key-for-jwt
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION=86400
+    volumes:
+      - ./services/user-service:/app
+    networks:
+      - ticket-network
+    restart: unless-stopped
 
-  # Ticket Service - Uncomment when ready to deploy
-  # ticket-service:
-  #   build:
-  #     context: ./services/ticket-service
-  #     dockerfile: Dockerfile
-  #   container_name: ticket-ticket-service
-  #   env_file:
-  #     - ./config/database.env
-  #   networks:
-  #     - ticket-network
+  # Ticket Service
+  ticket-service:
+    build:
+      context: ./services/ticket-service
+      dockerfile: Dockerfile
+    container_name: ticket-ticket-service
+    ports:
+      - "8001:8001"
+    environment:
+      - MONGO_URI=mongodb://14.161.50.86:27017
+      - MONGO_DATABASE=tickets
+      - JWT_SECRET=your-secret-key-for-jwt
+      - JWT_ALGORITHM=HS256
+    volumes:
+      - ./services/ticket-service:/app
+    networks:
+      - ticket-network
+    restart: unless-stopped
+
+  # File Service
+  file-service:
+    build:
+      context: ./services/file-service
+      dockerfile: Dockerfile
+    container_name: ticket-file-service
+    ports:
+      - "8002:8002"
+    environment:
+      - MONGO_HOST=14.161.50.86
+      - MONGO_PORT=27017
+      - MONGO_USER=admin
+      - MONGO_PASSWORD=admin
+      - MONGO_DB=file_service
+      - STORAGE_TYPE=local
+      - LOCAL_STORAGE_PATH=./data/files
+      - MAX_UPLOAD_SIZE=104857600
+      - USER_SERVICE_URL=http://user-service:8000
+      - TICKET_SERVICE_URL=http://ticket-service:8001
+      - JWT_SECRET_KEY=your-secret-key-for-jwt
+    volumes:
+      - ./services/file-service:/app
+      - file_storage_data:/app/data/files
+    networks:
+      - ticket-network
+    restart: unless-stopped
+
+  # Analytics Service
+  analytics-service:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    container_name: ticket-analytics-service
+    ports:
+      - "8005:8005"
+    environment:
+      - POSTGRES_SERVER=14.161.50.86
+      - POSTGRES_PORT=25432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=analytics_service
+      - MONGODB_URL=mongodb://14.161.50.86:27017
+      - MONGODB_DATABASE=analytics_service
+      - JWT_SECRET=your-super-secret-key-here
+      - JWT_ALGORITHM=HS256
+      - USER_SERVICE_URL=http://user-service:8000
+      - TICKET_SERVICE_URL=http://ticket-service:8001
+      - REPORT_SERVICE_URL=http://report-service:8004
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./services/analytics-service:/app
+    depends_on:
+      - redis
+      - user-service
+      - ticket-service
+    networks:
+      - ticket-network
+    restart: unless-stopped
 
 networks:
   ticket-network:
@@ -84,3 +174,4 @@ networks:
 volumes:
   mongodb_data:
   postgres_data:
+  file_storage_data:
