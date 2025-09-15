@@ -1,0 +1,5 @@
+# Ignore all .env files (containing sensitive information)
+*.env
+
+# But keep example files
+!*.env.example

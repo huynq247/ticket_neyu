@@ -4,7 +4,7 @@
 - [x] Khởi tạo repository Git
 - [x] Thiết lập quy tắc phân nhánh (Git branching strategy)
 - [x] Tạo cấu trúc thư mục cho dự án microservices
-- [ ] Thiết lập môi trường phát triển (Docker, Docker Compose)
+- [x] Thiết lập môi trường phát triển (Docker, Docker Compose)
 - [ ] Thiết lập CI/CD pipeline
 - [ ] Thiết lập tài liệu API (Swagger/OpenAPI)
 

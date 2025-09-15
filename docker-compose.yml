@@ -1,33 +1,35 @@
 version: '3.8'
 
 services:
-  # Databases
-  mongodb:
-    image: mongo:latest
-    container_name: ticket-mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-    networks:
-      - ticket-network
+  # Databases - Commented out for using external databases
+  # Uncomment if you want to use containerized databases
+  
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: ticket-mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=admin
+  #     - MONGO_INITDB_ROOT_PASSWORD=password
+  #   networks:
+  #     - ticket-network
 
-  postgres:
-    image: postgres:latest
-    container_name: ticket-postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=users
-    networks:
-      - ticket-network
+  # postgres:
+  #   image: postgres:latest
+  #   container_name: ticket-postgres
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_USER=admin
+  #     - POSTGRES_PASSWORD=password
+  #     - POSTGRES_DB=users
+  #   networks:
+  #     - ticket-network
 
   # Support Services
   redis:
@@ -46,6 +48,8 @@ services:
   #   container_name: ticket-api-gateway
   #   ports:
   #     - "8000:8000"
+  #   env_file:
+  #     - ./config/database.env
   #   depends_on:
   #     - redis
   #   networks:
@@ -57,8 +61,8 @@ services:
   #     context: ./services/user-service
   #     dockerfile: Dockerfile
   #   container_name: ticket-user-service
-  #   depends_on:
-  #     - postgres
+  #   env_file:
+  #     - ./config/database.env
   #   networks:
   #     - ticket-network
 
@@ -68,8 +72,8 @@ services:
   #     context: ./services/ticket-service
   #     dockerfile: Dockerfile
   #   container_name: ticket-ticket-service
-  #   depends_on:
-  #     - mongodb
+  #   env_file:
+  #     - ./config/database.env
   #   networks:
   #     - ticket-network
 

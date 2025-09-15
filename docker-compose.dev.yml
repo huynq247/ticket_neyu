@@ -3,22 +3,22 @@ version: '3.8'
 services:
   # Dev environment extensions
   
-  # MongoDB UI
+  # MongoDB UI - Configure to connect to your external MongoDB
   mongo-express:
     image: mongo-express:latest
     container_name: ticket-mongo-express
     ports:
       - "8081:8081"
     environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-    depends_on:
-      - mongodb
+      - ME_CONFIG_MONGODB_SERVER=${MONGODB_HOST:-localhost}
+      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT:-27017}
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGODB_USER:-}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGODB_PASSWORD:-}
+      - ME_CONFIG_MONGODB_AUTH_DATABASE=${MONGODB_AUTH_SOURCE:-admin}
     networks:
       - ticket-network
 
-  # PostgreSQL UI
+  # PostgreSQL UI - Configure to connect to your external PostgreSQL
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: ticket-pgadmin
@@ -27,8 +27,6 @@ services:
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@example.com
       - PGADMIN_DEFAULT_PASSWORD=password
-    depends_on:
-      - postgres
     networks:
       - ticket-network
 
@@ -39,7 +37,7 @@ services:
     ports:
       - "8083:8081"
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOSTS=local:${REDIS_HOST:-redis}:${REDIS_PORT:-6379}:${REDIS_DB_INDEX:-0}:${REDIS_PASSWORD:-}
     depends_on:
       - redis
     networks:
