@@ -1,7 +1,6 @@
 import os
 from typing import List, Union, Optional, Dict, Any
-from pydantic_settings import BaseSettings
-from pydantic import AnyHttpUrl, validator
+from pydantic import AnyHttpUrl, validator, BaseSettings
 from dotenv import load_dotenv
 
 # Load .env file

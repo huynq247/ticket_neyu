@@ -1,8 +1,7 @@
 import secrets
 from typing import List, Optional, Union, Dict, Any
 
-from pydantic import AnyHttpUrl, EmailStr, validator
-from pydantic_settings import BaseSettings
+from pydantic import AnyHttpUrl, EmailStr, validator, BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Notification Service"

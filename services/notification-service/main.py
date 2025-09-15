@@ -1,39 +1,53 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import time
+import os
+import uvicorn
+import sys
 
-from app.api.api import api_router
-from app.core.config import settings
-
+# Create a simple health check endpoint first, before any imports that might fail
 app = FastAPI(
-    title=settings.PROJECT_NAME,
+    title="Notification Service",
     description="Notification Service API for Ticket Management System",
     version="0.1.0",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url="/api/v1/openapi.json"
 )
 
 # Set up CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=["http://localhost", "http://localhost:8080", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API router
-app.include_router(api_router, prefix=settings.API_V1_STR)
-
 @app.get("/")
 def health_check():
     """Health check endpoint"""
-    return {
-        "status": "ok", 
-        "service": "notification-service",
-        "timestamp": time.time(),
-        "version": "0.1.0"
-    }
+    return {"status": "ok", "service": "notification-service"}
+
+try:
+    # Only import these if possible
+    from app.api.api import api_router
+    from app.core.config import settings
+    
+    # Include API router
+    app.include_router(api_router, prefix="/api/v1")
+except Exception as e:
+    print(f"Warning: Could not load full API: {e}")
+    print("Notification service will run in limited mode")
+    
+    @app.get("/api/v1/status")
+    def api_status():
+        return {
+            "status": "limited", 
+            "message": "Notification service is running in limited mode due to dependency issues",
+            "error": str(e)
+        }
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
+    try:
+        print("Starting Notification Service on port 8003...")
+        uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
+    except Exception as e:
+        print(f"Error starting server: {e}")

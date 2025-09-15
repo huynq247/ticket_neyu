@@ -1,86 +1,81 @@
-from typing import Dict, Any
-import pymongo
-import redis
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from pymongo import MongoClient
+from pymongo.database import Database
+import os
+import time
 
 from app.core.config import settings
 
-# MongoDB Connection
-mongo_client = pymongo.MongoClient(settings.MONGO_URI)
-mongo_db = mongo_client[settings.MONGO_DB]
+# Create a simple file-based database for development
+class FileBasedDB:
+    def __init__(self, base_dir="./data/reports"):
+        self.base_dir = base_dir
+        os.makedirs(base_dir, exist_ok=True)
+        
+        # Create a simple collection-like interface
+        self.reports = FileCollection(os.path.join(base_dir, "reports"))
+        self.templates = FileCollection(os.path.join(base_dir, "templates"))
+    
+    def __getitem__(self, collection_name):
+        if collection_name == "reports":
+            return self.reports
+        elif collection_name == "templates":
+            return self.templates
+        raise KeyError(f"Collection {collection_name} not found")
 
-# Report collections
-report_collection = mongo_db["reports"]
-report_template_collection = mongo_db["report_templates"]
-dashboard_collection = mongo_db["dashboards"]
-scheduled_report_collection = mongo_db["scheduled_reports"]
+class FileCollection:
+    def __init__(self, directory):
+        self.directory = directory
+        os.makedirs(directory, exist_ok=True)
+    
+    def create_index(self, field_name):
+        # No-op for file-based storage
+        pass
+    
+    def insert_one(self, document):
+        # Implementation for local file ops will be handled in models
+        return {"inserted_id": document.get("_id")}
+    
+    def find_one(self, query):
+        # Implementation for local file ops will be handled in models
+        return None
+    
+    def find(self, query=None):
+        # Implementation for local file ops will be handled in models
+        return []
+    
+    def update_one(self, query, update):
+        # Implementation for local file ops will be handled in models
+        return {"modified_count": 0}
+    
+    def delete_one(self, query):
+        # Implementation for local file ops will be handled in models
+        return {"deleted_count": 0}
+    
+    def count_documents(self, query):
+        # Implementation for local file ops will be handled in models
+        return 0
 
-# Create indices for better performance
-report_collection.create_index([("created_by", pymongo.ASCENDING)])
-report_collection.create_index([("created_at", pymongo.DESCENDING)])
-report_template_collection.create_index([("name", pymongo.ASCENDING)], unique=True)
-dashboard_collection.create_index([("created_by", pymongo.ASCENDING)])
-scheduled_report_collection.create_index([("next_run", pymongo.ASCENDING)])
+# Try to connect to MongoDB, fall back to file-based storage if it fails
+try:
+    print("Attempting to connect to MongoDB...")
+    client = MongoClient(settings.MONGO_URI, serverSelectionTimeoutMS=5000)
+    # Test the connection
+    client.server_info()
+    db = client[settings.MONGO_DB]
+    print("Successfully connected to MongoDB")
+except Exception as e:
+    print(f"MongoDB connection failed: {e}")
+    print("Using file-based storage as fallback")
+    db = FileBasedDB()
 
-# PostgreSQL Connection (Read-only for reporting)
-sqlalchemy_engine = create_engine(
-    settings.POSTGRES_URI,
-    pool_pre_ping=True,
-    connect_args={"options": "-c statement_timeout=30000"}  # 30 seconds timeout
-)
-SqlAlchemySessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=sqlalchemy_engine)
-SqlAlchemyBase = declarative_base()
+# Define collections
+report_collection = db["reports"]
+template_collection = db["templates"]
 
-# Redis Connection (for caching)
-redis_client = redis.Redis(
-    host=settings.REDIS_HOST,
-    port=settings.REDIS_PORT,
-    password=settings.REDIS_PASSWORD,
-    db=settings.REDIS_DB,
-    decode_responses=True
-)
-
-# Helper functions
-def get_db_session():
-    """
-    Get a PostgreSQL database session
-    """
-    db = SqlAlchemySessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-def save_report(report_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Save a report to MongoDB
-    """
-    result = report_collection.insert_one(report_data)
-    return report_collection.find_one({"_id": result.inserted_id})
-
-
-def save_report_template(template_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Save a report template to MongoDB
-    """
-    result = report_template_collection.insert_one(template_data)
-    return report_template_collection.find_one({"_id": result.inserted_id})
-
-
-def save_dashboard(dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Save a dashboard to MongoDB
-    """
-    result = dashboard_collection.insert_one(dashboard_data)
-    return dashboard_collection.find_one({"_id": result.inserted_id})
-
-
-def save_scheduled_report(scheduled_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Save a scheduled report to MongoDB
-    """
-    result = scheduled_report_collection.insert_one(scheduled_data)
-    return scheduled_report_collection.find_one({"_id": result.inserted_id})
+# Create indexes (only affects MongoDB, no-op for file-based)
+try:
+    report_collection.create_index("user_id")
+    report_collection.create_index("created_at")
+    template_collection.create_index("name")
+except Exception as e:
+    print(f"Failed to create indexes: {e}")

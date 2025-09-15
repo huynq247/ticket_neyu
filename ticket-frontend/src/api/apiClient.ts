@@ -1,9 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { API_BASE_URL, API_TIMEOUT, AUTH_STORAGE_KEY } from '@/utils/env';
 
-// Cấu hình mặc định
+// Cấu hình mặc định từ biến môi trường
 const config: AxiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
-  timeout: 10000,
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,7 +16,7 @@ const axiosInstance: AxiosInstance = axios.create(config);
 // Interceptor cho request
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem(AUTH_STORAGE_KEY);
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -38,7 +39,7 @@ axiosInstance.interceptors.response.use(
       // Xử lý lỗi 401 Unauthorized
       if (error.response.status === 401) {
         // Xóa token nếu hết hạn và chuyển về trang login
-        localStorage.removeItem('auth_token');
+        localStorage.removeItem(AUTH_STORAGE_KEY);
         window.location.href = '/login';
       }
       

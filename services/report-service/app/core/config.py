@@ -1,8 +1,7 @@
 import secrets
 from typing import List, Optional, Union, Dict, Any
 
-from pydantic import AnyHttpUrl, validator
-from pydantic_settings import BaseSettings
+from pydantic import AnyHttpUrl, validator, BaseSettings
 
 
 class Settings(BaseSettings):

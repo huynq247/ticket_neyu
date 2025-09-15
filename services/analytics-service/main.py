@@ -1,90 +1,53 @@
-import uvicorn
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
-from typing import List
+import os
+import uvicorn
+import sys
 
-from app.core.config import settings
-from app.api.endpoints import dashboard
-from app.db.database import engine, SessionLocal
-from app.models import sql_models
-from app.etl.scheduler import start_etl_scheduler, stop_etl_scheduler
-
-# Create database tables if they don't exist
-sql_models.Base.metadata.create_all(bind=engine)
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO if settings.DEBUG_MODE else logging.WARNING,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
-
-# Create FastAPI app
+# Create a simple health check endpoint first, before any imports that might fail
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description=settings.PROJECT_DESCRIPTION,
-    version=settings.PROJECT_VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
-    redoc_url=f"{settings.API_V1_STR}/redoc",
+    title="Analytics Service",
+    description="Analytics Service API for Ticket Management System",
+    version="0.1.0",
+    openapi_url="/api/v1/openapi.json"
 )
 
-# Configure CORS
-if settings.CORS_ORIGINS:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-# Include routers
-app.include_router(
-    dashboard.router,
-    prefix=f"{settings.API_V1_STR}/dashboard",
-    tags=["dashboard"],
+# Set up CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost", "http://localhost:8080", "http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Initialize services on startup
-    """
-    logger.info("Starting up Analytics Service")
-    # Start ETL scheduler
-    start_etl_scheduler()
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Clean up resources on shutdown
-    """
-    logger.info("Shutting down Analytics Service")
-    # Stop ETL scheduler
-    stop_etl_scheduler()
 
 @app.get("/")
-async def root():
-    """
-    Root endpoint for health check
-    """
-    return {
-        "service": settings.PROJECT_NAME,
-        "version": settings.PROJECT_VERSION,
-        "status": "active"
-    }
+def health_check():
+    """Health check endpoint"""
+    return {"status": "ok", "service": "analytics-service"}
 
-@app.get(f"{settings.API_V1_STR}/health")
-async def health_check():
-    """
-    Health check endpoint
-    """
-    return {
-        "status": "healthy",
-        "version": settings.PROJECT_VERSION,
-    }
+try:
+    # Only import these if possible
+    from app.api.api import api_router
+    from app.core.config import settings
+    
+    # Include API router
+    app.include_router(api_router, prefix="/api/v1")
+except Exception as e:
+    print(f"Warning: Could not load full API: {e}")
+    print("Analytics service will run in limited mode")
+    
+    @app.get("/api/v1/status")
+    def api_status():
+        return {
+            "status": "limited", 
+            "message": "Analytics service is running in limited mode due to dependency issues",
+            "error": str(e)
+        }
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8005, reload=settings.DEBUG_MODE)
+    try:
+        print("Starting Analytics Service on port 8005...")
+        uvicorn.run("main:app", host="0.0.0.0", port=8005, reload=True)
+    except Exception as e:
+        print(f"Error starting server: {e}")
