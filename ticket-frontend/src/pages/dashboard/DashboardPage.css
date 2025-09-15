@@ -1,0 +1,32 @@
+.dashboard-container {
+  padding: 0 8px;
+}
+
+.dashboard-stats {
+  margin-top: 24px;
+}
+
+.stats-row {
+  margin-bottom: 24px;
+}
+
+.recent-tickets-card {
+  margin-bottom: 24px;
+}
+
+.ticket-meta {
+  margin-left: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+
+.ant-list-item-meta-description {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ant-tag {
+  margin-right: 0;
+}

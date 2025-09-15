@@ -9,12 +9,40 @@
 - [ ] Thiết lập tài liệu API (Swagger/OpenAPI)
 
 ## Cơ sở Hạ tầng
+- [x] Thiết lập cấu hình kết nối cơ sở dữ liệu
+- [x] Kết nối thành công đến MongoDB
+- [x] Kết nối thành công đến PostgreSQL
 - [ ] Thiết lập môi trường development
 - [ ] Thiết lập môi trường staging
 - [ ] Thiết lập môi trường production
 - [ ] Cấu hình mạng và bảo mật
 - [ ] Thiết lập monitoring và logging
 - [ ] Thiết lập backup và disaster recovery
+
+## Phát triển Core Services
+- [x] Phát triển User Service
+  - [x] Thiết lập project structure
+  - [x] Triển khai cơ sở dữ liệu PostgreSQL cho User Service
+  - [x] Phát triển API endpoints cơ bản
+  - [x] Thiết lập xác thực và phân quyền
+- [x] Phát triển API Gateway
+  - [x] Thiết lập project structure
+  - [x] Thiết lập routing cơ bản
+  - [x] Cấu hình middleware xác thực
+  - [ ] Tích hợp với User Service
+- [x] Phát triển Ticket Service
+  - [x] Thiết lập project structure
+  - [x] Triển khai cơ sở dữ liệu MongoDB cho Ticket Service
+  - [x] Phát triển API endpoints cơ bản
+  - [x] Thiết lập models cho tickets, categories, và comments
+- [ ] Phát triển các services khác theo thứ tự trong implementation_order.md
+  - [x] Phát triển File Service
+    - [x] Thiết lập project structure
+    - [x] Triển khai cơ chế lưu trữ file
+    - [x] Phát triển API endpoints cơ bản
+    - [x] Tích hợp với User Service và Ticket Service
+  - [ ] Phát triển Notification Service
+  - [ ] Phát triển Report Service
 
 ## Tích hợp và Testing
 - [ ] Thiết lập framework testing

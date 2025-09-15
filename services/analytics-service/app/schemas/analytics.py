@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from datetime import datetime, date
 from enum import Enum
 
@@ -13,6 +13,47 @@ class TimeGranularity(str, Enum):
     MONTH = "month"
     QUARTER = "quarter"
     YEAR = "year"
+
+
+class AggregationDimension(str, Enum):
+    """
+    Dimensions for data aggregation
+    """
+    TIME = "time"
+    USER = "user"
+    DEPARTMENT = "department"
+    CATEGORY = "category"
+    PRIORITY = "priority"
+    STATUS = "status"
+    CHANNEL = "channel"
+
+
+class AggregationMetric(str, Enum):
+    """
+    Metrics for aggregation
+    """
+    TICKET_COUNT = "ticket_count"
+    RESOLUTION_TIME = "resolution_time"
+    RESPONSE_TIME = "response_time"
+    REOPENED_COUNT = "reopened_count"
+    SLA_VIOLATIONS = "sla_violations"
+    CUSTOMER_SATISFACTION = "customer_satisfaction"
+    FIRST_CONTACT_RESOLUTION = "first_contact_resolution"
+    AGENT_UTILIZATION = "agent_utilization"
+
+
+class ChartType(str, Enum):
+    """
+    Types of visualizations
+    """
+    AUTO = "auto"
+    LINE = "line"
+    BAR = "bar"
+    PIE = "pie"
+    SCATTER = "scatter"
+    HEATMAP = "heatmap"
+    STACKED_BAR = "stacked_bar"
+    TABLE = "table"
 
 
 class DateRange(BaseModel):
@@ -177,3 +218,42 @@ class AnomalyDetectionResult(BaseModel):
     
     class Config:
         use_enum_values = True
+
+
+# New schemas for time-based analytics
+
+class MetricValue(BaseModel):
+    """
+    Schema for a metric value with timestamp
+    """
+    timestamp: str = Field(..., description="Timestamp for the data point")
+    value: float = Field(..., description="Value of the metric")
+
+
+class TimeSeriesResponse(BaseModel):
+    """
+    Response schema for time series data
+    """
+    time_range: Dict[str, Any] = Field(..., description="Time range parameters")
+    series: List[Dict[str, Any]] = Field(..., description="Series data for each metric")
+    visualization: Optional[Dict[str, Any]] = Field(None, description="Visualization data")
+
+
+# New schemas for user analytics
+
+class UserMetrics(BaseModel):
+    """
+    Schema for user performance metrics
+    """
+    user_id: str = Field(..., description="User ID")
+    user_name: Optional[str] = Field(None, description="User name")
+    department: Optional[str] = Field(None, description="Department")
+    metrics: Dict[str, float] = Field(..., description="Metrics data")
+
+
+class UserAnalyticsResponse(BaseModel):
+    """
+    Response schema for user analytics
+    """
+    users: List[Dict[str, Any]] = Field(..., description="User performance data")
+    visualization: Optional[Dict[str, Any]] = Field(None, description="Visualization data")

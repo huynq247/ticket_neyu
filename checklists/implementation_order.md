@@ -44,9 +44,9 @@ Dưới đây là thứ tự đề xuất để thực hiện các công việc 
 
 7. **Phát triển File Service**
    - Tham khảo: `file_service_checklist.md`
-   - Thiết lập cơ chế lưu trữ file
-   - Xây dựng API endpoint cơ bản (upload/download)
-   - Tích hợp với Ticket Service
+   - ✅ Thiết lập cơ chế lưu trữ file
+   - ✅ Xây dựng API endpoint cơ bản (upload/download)
+   - ✅ Tích hợp với Ticket Service
 
 ## Giai đoạn 3: Phát triển Frontend cơ bản (Tuần 3-4)
 

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  report-service:
+    build: .
+    ports:
+      - "8004:8004"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DATABASE=report_service
+      - REDIS_URL=redis://redis:6379/0
+      - TICKET_SERVICE_URL=http://ticket-service:8001
+      - USER_SERVICE_URL=http://user-service:8000
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8003
+      - REPORT_SERVICE_URL=http://report-service:8004
+      - JWT_SECRET=${JWT_SECRET}
+      - SERVICE_API_KEY=${SERVICE_API_KEY}
+    volumes:
+      - ./app:/app/app
+    depends_on:
+      - mongodb
+      - redis
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongodb_data:
+  redis_data:

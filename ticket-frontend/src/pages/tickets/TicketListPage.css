@@ -1,0 +1,27 @@
+.ticket-list-container {
+  padding: 0 8px;
+}
+
+.ticket-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ticket-list-filters {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+}
+
+.ticket-list-table {
+  background-color: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ant-badge {
+  margin-right: 8px;
+}

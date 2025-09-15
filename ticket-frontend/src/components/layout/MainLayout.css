@@ -1,0 +1,75 @@
+.main-layout {
+  min-height: 100vh;
+}
+
+.logo-container {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1677ff;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 100%;
+}
+
+.trigger-button {
+  font-size: 18px;
+  padding: 0 24px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.notification-badge {
+  margin-right: 24px;
+}
+
+.notification-button {
+  font-size: 16px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.user-info:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+
+.username {
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+.main-content {
+  margin: 24px 16px;
+  padding: 24px;
+  background: #fff;
+  min-height: 280px;
+  border-radius: 4px;
+}
+
+.content-container {
+  max-width: 100%;
+}

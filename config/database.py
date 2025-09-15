@@ -139,12 +139,24 @@ def get_postgres_connection():
     Returns:
         psycopg2.connection: PostgreSQL connection
     """
+    # Get host and port from environment variables or extract from URI
+    host = os.getenv("POSTGRES_HOST")
+    port = os.getenv("POSTGRES_PORT")
+    
+    if not host or not port:
+        # Extract from URI if not provided directly
+        uri_parts = POSTGRES_URI.split("//")[1]
+        user_pass_host_port = uri_parts.split("/")[0]
+        host_port = user_pass_host_port.split("@")[1]
+        host = host_port.split(":")[0]
+        port = host_port.split(":")[1]
+    
     return psycopg2.connect(
         dbname=POSTGRES_DATABASE,
         user=POSTGRES_USER,
         password=POSTGRES_PASSWORD,
-        host=POSTGRES_URI.split("//")[1].split(":")[0],
-        port=int(POSTGRES_URI.split("//")[1].split(":")[1].split("/")[0])
+        host=host,
+        port=int(port)
     )
 
 def get_sqlalchemy_engine():
