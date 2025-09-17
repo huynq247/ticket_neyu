@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
     
     # Database - MongoDB (for unstructured analytics data)
-    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-    MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", "analytics_service")
+    MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://admin:Mypassword123@14.161.50.86:27017/content_db?authSource=admin")
+    MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", "content_db")
     
     # Redis for caching
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")

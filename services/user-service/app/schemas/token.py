@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class Token(BaseModel):
@@ -18,3 +18,8 @@ class TokenPayload(BaseModel):
 
 class RefreshToken(BaseModel):
     refresh_token: str
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str

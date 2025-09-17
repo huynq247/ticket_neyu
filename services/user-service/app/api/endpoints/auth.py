@@ -13,7 +13,7 @@ from app.core.security import (
     get_password_hash,
     verify_password,
 )
-from app.schemas.token import Token, RefreshToken
+from app.schemas.token import Token, RefreshToken, LoginRequest
 from app.models.user import User
 from app.db.session import get_db
 
@@ -34,6 +34,32 @@ def login_access_token(
     
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    return {
+        "access_token": create_access_token(user.id, expires_delta=access_token_expires),
+        "refresh_token": create_refresh_token(user.id),
+        "token_type": "bearer",
+    }
+
+
+@router.post("/login/email", response_model=Token)
+def login_with_email(
+    db: Session = Depends(get_db), login_data: LoginRequest = Body(...)
+) -> Any:
+    """
+    Email and password login, get an access token for future requests
+    """
+    # Check email - using explicit string parameters to avoid SQLAlchemy binding issues
+    email = login_data.email
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user or not verify_password(login_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
     
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")

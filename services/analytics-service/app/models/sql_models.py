@@ -136,6 +136,56 @@ class DimStatus(Base):
     etl_updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class DimTicketType(Base):
+    """
+    Ticket Type dimension table
+    """
+    __tablename__ = "dim_ticket_types"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    type_id = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String(50))
+    description = Column(Text)
+    etl_updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class DimTicketStatus(Base):
+    """
+    Ticket Status dimension table - provides a more detailed status categorization than the basic DimStatus
+    """
+    __tablename__ = "dim_ticket_statuses"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    status_id = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String(50))
+    description = Column(Text)
+    category = Column(String(50))  # e.g., "open", "in progress", "resolved", "closed"
+    is_final = Column(Boolean, default=False)  # Whether this is a terminal status
+    allows_reopen = Column(Boolean, default=True)
+    sla_paused = Column(Boolean, default=False)  # Whether SLA timer is paused in this status
+    etl_updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class DimDepartment(Base):
+    """
+    Department dimension table
+    """
+    __tablename__ = "dim_departments"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    department_id = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String(100))
+    description = Column(Text, nullable=True)
+    parent_department_id = Column(Integer, ForeignKey("dim_departments.id"), nullable=True)
+    manager_user_id = Column(Integer, ForeignKey("dim_users.id"), nullable=True)
+    is_active = Column(Boolean, default=True)
+    etl_updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Self-referential relationship
+    parent_department = relationship("DimDepartment", remote_side=[id])
+    manager = relationship("DimUser", foreign_keys=[manager_user_id])
+
+
 class FactUserActivity(Base):
     """
     Fact table for user activity

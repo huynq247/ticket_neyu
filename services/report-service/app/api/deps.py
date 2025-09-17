@@ -4,6 +4,7 @@ import jwt
 from jwt.exceptions import PyJWTError
 from typing import Dict, Any, Optional
 import httpx
+import time
 
 from app.core.config import settings
 
@@ -59,3 +60,29 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Authentication error: {str(e)}"
         )
+
+async def get_service_token() -> str:
+    """
+    Generate a service-to-service authentication token
+    
+    This is used when one microservice needs to call another microservice
+    without a user context (e.g., for scheduled jobs, background tasks)
+    """
+    # Create a simple JWT token with service identity
+    payload = {
+        "sub": "report-service",
+        "iss": "report-service",
+        "aud": "microservices",
+        "role": "service",
+        "exp": int(time.time()) + 3600,  # Token valid for 1 hour
+        "iat": int(time.time()),
+    }
+    
+    # Sign the token with the shared secret
+    token = jwt.encode(
+        payload,
+        settings.JWT_SECRET_KEY,
+        algorithm=settings.JWT_ALGORITHM
+    )
+    
+    return token

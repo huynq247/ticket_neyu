@@ -15,6 +15,23 @@ class TimeGranularity(str, Enum):
     YEAR = "year"
 
 
+class AggregationWindow(str, Enum):
+    """
+    Time window for data aggregation
+    """
+    LAST_24_HOURS = "last_24_hours"
+    LAST_7_DAYS = "last_7_days"
+    LAST_30_DAYS = "last_30_days"
+    LAST_90_DAYS = "last_90_days"
+    LAST_12_MONTHS = "last_12_months"
+    CURRENT_DAY = "current_day"
+    CURRENT_WEEK = "current_week"
+    CURRENT_MONTH = "current_month"
+    CURRENT_QUARTER = "current_quarter"
+    CURRENT_YEAR = "current_year"
+    CUSTOM = "custom"
+
+
 class AggregationDimension(str, Enum):
     """
     Dimensions for data aggregation

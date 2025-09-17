@@ -30,9 +30,25 @@ try:
     # Only import these if possible
     from app.api.api import api_router
     from app.core.config import settings
+    from app.core.database import db, client
     
     # Include API router
     app.include_router(api_router, prefix="/api/v1")
+    
+    @app.get("/db-check")
+    def db_check():
+        """Database connection check"""
+        try:
+            # Check if we're using MongoDB or file-based fallback
+            if hasattr(db, "command"):
+                # This is a MongoDB connection
+                db.command("ping")
+                return {"status": "ok", "message": "MongoDB connection successful", "storage_type": "mongodb"}
+            else:
+                # This is the file-based fallback
+                return {"status": "warning", "message": "Using file-based storage fallback", "storage_type": "file"}
+        except Exception as e:
+            return {"status": "error", "message": f"Database connection failed: {str(e)}"}
 except Exception as e:
     print(f"Warning: Could not load full API: {e}")
     print("Notification service will run in limited mode")
@@ -44,6 +60,11 @@ except Exception as e:
             "message": "Notification service is running in limited mode due to dependency issues",
             "error": str(e)
         }
+    
+    @app.get("/db-check")
+    def db_check():
+        """Database connection check"""
+        return {"status": "error", "message": "Service is running in limited mode, database unavailable", "error": str(e)}
 
 if __name__ == "__main__":
     try:

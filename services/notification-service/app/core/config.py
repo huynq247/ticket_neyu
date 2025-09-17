@@ -1,7 +1,8 @@
 import secrets
 from typing import List, Optional, Union, Dict, Any
 
-from pydantic import AnyHttpUrl, EmailStr, validator, BaseSettings
+from pydantic import AnyHttpUrl, EmailStr, validator
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Notification Service"
@@ -30,7 +31,7 @@ class Settings(BaseSettings):
     
     @property
     def MONGO_URI(self) -> str:
-        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}"
+        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}?authSource=admin"
     
     # Redis Settings (for Celery)
     REDIS_HOST: str
@@ -71,12 +72,15 @@ class Settings(BaseSettings):
     JWT_PUBLIC_KEY: str
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    JWT_SECRET_KEY: str = "your-super-secret-key-for-development-only"
     
     # For compatibility with API deps
-    CORS_ORIGINS = BACKEND_CORS_ORIGINS
+    CORS_ORIGINS: List[str] = BACKEND_CORS_ORIGINS
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+        "extra": "allow"  # Allow extra fields
+    }
 
 settings = Settings()

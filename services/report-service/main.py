@@ -30,9 +30,22 @@ try:
     # Only import these if possible
     from app.api.api import api_router
     from app.core.config import settings
+    from app.db.database import get_mongodb_client
     
     # Include API router
     app.include_router(api_router, prefix="/api/v1")
+    
+    @app.get("/db-check")
+    def db_check():
+        """Database connection check"""
+        try:
+            # Use the get_mongodb_client function to test connection
+            client = get_mongodb_client()
+            db = client[settings.MONGO_DB]
+            db.command("ping")
+            return {"status": "ok", "message": "MongoDB connection successful"}
+        except Exception as e:
+            return {"status": "error", "message": f"Database connection failed: {str(e)}"}
 except Exception as e:
     print(f"Warning: Could not load full API: {e}")
     print("Report service will run in limited mode")
@@ -44,6 +57,11 @@ except Exception as e:
             "message": "Report service is running in limited mode due to dependency issues",
             "error": str(e)
         }
+    
+    @app.get("/db-check")
+    def db_check():
+        """Database connection check"""
+        return {"status": "error", "message": "Service is running in limited mode, database unavailable", "error": str(e)}
 
 if __name__ == "__main__":
     try:

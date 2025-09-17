@@ -1,6 +1,9 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, ForwardRef
 from pydantic import BaseModel, EmailStr
+
+# Forward references for circular dependencies
+PermissionRef = ForwardRef('Permission')
 
 
 # Shared properties
@@ -29,7 +32,7 @@ class UserInDBBase(UserBase):
     updated_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Additional properties to return via API
@@ -49,20 +52,23 @@ class RoleBase(BaseModel):
 
 
 class RoleCreate(RoleBase):
-    pass
+    permissions: Optional[List[str]] = []
 
 
-class RoleUpdate(RoleBase):
-    pass
+class RoleUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    permissions: Optional[List[str]] = None
 
 
 class Role(RoleBase):
     id: int
+    permissions: List[PermissionRef] = []
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Department schemas
@@ -85,26 +91,34 @@ class Department(DepartmentBase):
     updated_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Permission schemas
 class PermissionBase(BaseModel):
+    id: str
     name: str
     description: Optional[str] = None
-    role_id: int
+    category: str
 
 
 class PermissionCreate(PermissionBase):
     pass
 
 
-class PermissionUpdate(PermissionBase):
-    pass
+class PermissionUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
 
 
 class Permission(PermissionBase):
-    id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+# Resolve forward references
+Role.update_forward_refs()

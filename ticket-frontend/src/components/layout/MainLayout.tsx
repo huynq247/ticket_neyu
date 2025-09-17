@@ -11,10 +11,14 @@ import {
   UserOutlined,
   LogoutOutlined,
   BarChartOutlined,
+  UsergroupAddOutlined,
+  ApartmentOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import NotificationCenter from '@/components/NotificationCenter';
+import PermissionControl from '@/components/common/PermissionControl';
 import './MainLayout.css';
 
 const { Header, Sider, Content } = Layout;
@@ -101,21 +105,50 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       key: '/tickets',
       icon: <FileOutlined />,
       label: 'Tickets',
+      permission: 'ticket:view',
     },
     {
-      key: '/reports',
+      key: '/analytics',
       icon: <BarChartOutlined />,
-      label: 'Reports & Analytics',
+      label: 'Analytics',
+      permission: 'analytics:view',
     },
     {
-      key: '/team',
+      key: 'user-management',
       icon: <TeamOutlined />,
-      label: 'Team',
+      label: 'User Management',
+      children: [
+        {
+          key: '/users',
+          icon: <UserOutlined />,
+          label: 'Users',
+          permission: 'user:view',
+        },
+        {
+          key: '/roles',
+          icon: <ApiOutlined />,
+          label: 'Roles & Permissions',
+          permission: 'role:view',
+        },
+        {
+          key: '/departments',
+          icon: <ApartmentOutlined />,
+          label: 'Departments',
+          permission: 'department:view',
+        },
+        {
+          key: '/coordinators',
+          icon: <UsergroupAddOutlined />,
+          label: 'Dispatchers/Coordinators',
+          permissions: ['dispatcher:assign', 'coordinator:assign'],
+        },
+      ],
     },
     {
       key: '/settings',
       icon: <SettingOutlined />,
       label: 'Settings',
+      permission: 'system:settings',
     },
   ];
 

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.api import api_router
 from app.core.config import settings
+from app.db.mongodb import MongoDB
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -27,6 +28,15 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 def health_check():
     """Health check endpoint"""
     return {"status": "ok", "service": "ticket-service"}
+
+@app.get("/db-check")
+def db_check():
+    """Database connection check"""
+    try:
+        db = MongoDB.connect()
+        return {"status": "ok", "message": "Database connection successful"}
+    except Exception as e:
+        return {"status": "error", "message": f"Database connection failed: {str(e)}"}
 
 if __name__ == "__main__":
     import uvicorn

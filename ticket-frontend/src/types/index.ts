@@ -1,24 +1,18 @@
 // Các kiểu dữ liệu cơ bản cho ứng dụng
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  fullName: string;
-  role: UserRole;
-  department?: string;
-  avatar?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+export * from './user';
+export * from './role';
 
 export enum UserRole {
   ADMIN = 'admin',
   MANAGER = 'manager',
   AGENT = 'agent',
   CUSTOMER = 'customer',
+  DISPATCHER = 'dispatcher',
+  COORDINATOR = 'coordinator',
 }
+
+// Import và export các kiểu dữ liệu role và permission
+export * from './role';
 
 export interface Ticket {
   id: string;

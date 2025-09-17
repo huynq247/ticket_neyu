@@ -30,6 +30,14 @@ class User(Base):
     roles = relationship("Role", secondary=user_role, back_populates="users")
 
 
+# Role-Permission association table for many-to-many relationship
+role_permission = Table(
+    "role_permission",
+    Base.metadata,
+    Column("role_id", Integer, ForeignKey("roles.id")),
+    Column("permission_id", String, ForeignKey("permissions.id"))
+)
+
 class Role(Base):
     __tablename__ = "roles"
 
@@ -41,19 +49,21 @@ class Role(Base):
     
     # Relationships
     users = relationship("User", secondary=user_role, back_populates="roles")
-    permissions = relationship("Permission", back_populates="role")
+    permissions = relationship("Permission", secondary=role_permission, back_populates="roles")
 
 
 class Permission(Base):
     __tablename__ = "permissions"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
+    id = Column(String, primary_key=True, index=True)
+    name = Column(String, nullable=False)
     description = Column(String)
-    role_id = Column(Integer, ForeignKey("roles.id"))
+    category = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
-    role = relationship("Role", back_populates="permissions")
+    roles = relationship("Role", secondary=role_permission, back_populates="permissions")
 
 
 class Department(Base):

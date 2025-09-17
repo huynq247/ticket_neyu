@@ -27,11 +27,15 @@ def get_mongodb_client() -> MongoClient:
     global _mongo_client
     if _mongo_client is None:
         try:
-            _mongo_client = MongoClient(settings.MONGODB_URL)
+            mongo_url = settings.MONGODB_URL
+            print(f"Attempting to connect to MongoDB with URL: {mongo_url}")
+            _mongo_client = MongoClient(mongo_url)
             # Test connection
             _mongo_client.server_info()
+            print("Successfully connected to MongoDB")
             logger.info("MongoDB connection established")
         except Exception as e:
+            print(f"MongoDB connection failed: {e}")
             logger.error(f"Failed to connect to MongoDB: {e}")
             raise
     return _mongo_client

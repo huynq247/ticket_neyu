@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api import deps
-from app.models.user import Role
+from app.models.user import Role, Permission
 from app.schemas.user import Role as RoleSchema, RoleCreate, RoleUpdate
 from app.db.session import get_db
 
@@ -44,10 +44,23 @@ def create_role(
         )
     
     # Create new role
-    db_role = Role(**role_in.dict())
+    role_data = role_in.dict(exclude={"permissions"})
+    db_role = Role(**role_data)
     db.add(db_role)
     db.commit()
     db.refresh(db_role)
+    
+    # Add permissions if provided
+    if role_in.permissions:
+        for permission_id in role_in.permissions:
+            permission = db.query(Permission).filter(Permission.id == permission_id).first()
+            if permission:
+                db_role.permissions.append(permission)
+        
+        db.add(db_role)
+        db.commit()
+        db.refresh(db_role)
+    
     return db_role
 
 
@@ -98,8 +111,20 @@ def update_role(
             )
     
     # Update role
-    for key, value in role_in.dict(exclude_unset=True).items():
-        setattr(role, key, value)
+    update_data = role_in.dict(exclude={"permissions"}, exclude_unset=True)
+    for field in update_data:
+        setattr(role, field, update_data[field])
+    
+    # Update permissions if provided
+    if role_in.permissions is not None:
+        # Clear existing permissions
+        role.permissions = []
+        
+        # Add new permissions
+        for permission_id in role_in.permissions:
+            permission = db.query(Permission).filter(Permission.id == permission_id).first()
+            if permission:
+                role.permissions.append(permission)
     
     db.add(role)
     db.commit()

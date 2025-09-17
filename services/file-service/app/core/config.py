@@ -2,7 +2,8 @@ import os
 import secrets
 from typing import List, Optional, Union, Dict, Any
 
-from pydantic import AnyHttpUrl, validator, BaseSettings
+from pydantic import AnyHttpUrl, validator
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "File Service"
@@ -29,7 +30,7 @@ class Settings(BaseSettings):
     
     @property
     def MONGO_URI(self) -> str:
-        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}"
+        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}?authSource=admin"
     
     # File Storage Settings
     STORAGE_TYPE: str = "local"  # Options: local, s3, gridfs

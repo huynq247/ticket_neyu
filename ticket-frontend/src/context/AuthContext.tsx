@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
+import { resetPermissionCache } from '@/utils/permissionUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -28,13 +29,46 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           // const response = await api.auth.verifyToken();
           // setUser(response.data);
           
+          // Thử lấy thông tin người dùng từ localStorage nếu có
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            try {
+              const parsedUser = JSON.parse(savedUser);
+              setUser(parsedUser);
+              return;
+            } catch (err) {
+              console.error('Error parsing saved user:', err);
+            }
+          }
+          
           // Mock data cho phát triển ban đầu
           setUser({
             id: '1',
-            username: 'admin',
             email: 'admin@example.com',
+            firstName: 'Admin',
+            lastName: 'User',
             fullName: 'Admin User',
-            role: 'admin' as any,
+            roles: [
+              {
+                id: 'admin-role',
+                name: 'admin',
+                description: 'Administrator role with all permissions',
+                permissions: [
+                  'analytics:view',
+                  'analytics:advanced',
+                  'ticket:view',
+                  'ticket:create',
+                  'ticket:update',
+                  'ticket:delete',
+                  'ticket:assign',
+                  'ticket:comment',
+                  'ticket:change-status',
+                  'ticket:view-all',
+                ],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              }
+            ],
             isActive: true,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -65,17 +99,42 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const token = 'mock-token-' + Date.now();
       const mockUser: User = {
         id: '1',
-        username: 'admin',
         email: email,
+        firstName: 'Admin',
+        lastName: 'User',
         fullName: 'Admin User',
-        role: 'admin' as any,
+        roles: [
+          {
+            id: 'admin-role',
+            name: 'admin',
+            description: 'Administrator role with all permissions',
+            permissions: [
+              'analytics:view',
+              'analytics:advanced',
+              'ticket:view',
+              'ticket:create',
+              'ticket:update',
+              'ticket:delete',
+              'ticket:assign',
+              'ticket:comment',
+              'ticket:change-status',
+              'ticket:view-all',
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        ],
         isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
       
       localStorage.setItem('auth_token', token);
+      localStorage.setItem('user', JSON.stringify(mockUser));
       setUser(mockUser);
+      
+      // Reset permission cache sau khi đăng nhập
+      resetPermissionCache();
     } catch (err: any) {
       setError(err.message || 'Failed to login. Please check your credentials.');
       throw err;
@@ -86,7 +145,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
     setUser(null);
+    
+    // Reset permission cache sau khi đăng xuất
+    resetPermissionCache();
   };
 
   const value = {

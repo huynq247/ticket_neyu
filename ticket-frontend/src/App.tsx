@@ -16,21 +16,52 @@ import TicketDetailPage from '@/pages/tickets/TicketDetailPage';
 import NewTicketPage from '@/pages/tickets/NewTicketPage';
 import AnalyticsDashboardPage from '@/pages/analytics/AnalyticsDashboardPage';
 
-// Placeholder components - sẽ được triển khai sau
+// User Management pages
+import UserManagementPage from '@/pages/users/UserManagementPage';
+import UserCreatePage from '@/pages/users/UserCreatePage';
+import UserEditPage from '@/pages/users/UserEditPage';
+import UserProfilePage from '@/pages/users/UserProfilePage';
+import RoleManagementPage from '@/pages/users/RoleManagementPage';
+import DepartmentManagementPage from '@/pages/users/DepartmentManagementPage';
+import CoordinatorManagementPage from '@/pages/users/CoordinatorManagementPage';
+
+// Error pages
+import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import DebugPage from '@/pages/debug/DebugPage'; // Thêm trang debug
+
 const NotFound = () => <div>404 - Page Not Found</div>;
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { SocketProvider } from '@/context/SocketContext';
+import PermissionGuard from '@/components/common/PermissionGuard';
 
 // Protected Route wrapper component
-const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
+const ProtectedRoute: React.FC<{ element: React.ReactElement; permissions?: string[]; permissionId?: string; requireAll?: boolean }> = ({ 
+  element, 
+  permissions = [], 
+  permissionId,
+  requireAll = false 
+}) => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
     return <div>Loading...</div>; // Could be replaced with a proper loading component
   }
   
-  return isAuthenticated ? element : <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <PermissionGuard
+      permissions={permissions}
+      permissionId={permissionId}
+      requireAll={requireAll}
+      redirectTo="/unauthorized"
+    >
+      {element}
+    </PermissionGuard>
+  );
 };
 
 const AppRoutes: React.FC = () => {
@@ -55,13 +86,32 @@ const AppRoutes: React.FC = () => {
         path="/reset-password" 
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ResetPasswordPage />} 
       />
+
+      {/* Error Pages */}
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
       
       {/* Protected routes */}
       <Route path="/dashboard" element={<ProtectedRoute element={<DashboardPage />} />} />
-      <Route path="/tickets" element={<ProtectedRoute element={<TicketListPage />} />} />
-      <Route path="/tickets/new" element={<ProtectedRoute element={<NewTicketPage />} />} />
-      <Route path="/tickets/:id" element={<ProtectedRoute element={<TicketDetailPage />} />} />
-      <Route path="/analytics" element={<ProtectedRoute element={<AnalyticsDashboardPage />} />} />
+      
+      {/* Tickets Routes with Permissions */}
+      <Route path="/tickets" element={<ProtectedRoute element={<TicketListPage />} permissionId="ticket:view" />} />
+      <Route path="/tickets/new" element={<ProtectedRoute element={<NewTicketPage />} permissionId="ticket:create" />} />
+      <Route path="/tickets/:id" element={<ProtectedRoute element={<TicketDetailPage />} permissionId="ticket:view" />} />
+      
+      {/* Analytics Routes with Permissions */}
+      <Route path="/analytics" element={<ProtectedRoute element={<AnalyticsDashboardPage />} permissionId="analytics:view" />} />
+      
+      {/* User Management Routes with Permissions */}
+      <Route path="/users" element={<ProtectedRoute element={<UserManagementPage />} permissionId="user:view" />} />
+      <Route path="/users/create" element={<ProtectedRoute element={<UserCreatePage />} permissionId="user:create" />} />
+      <Route path="/users/:userId/edit" element={<ProtectedRoute element={<UserEditPage />} permissionId="user:update" />} />
+      <Route path="/profile" element={<ProtectedRoute element={<UserProfilePage />} />} />
+      <Route path="/roles" element={<ProtectedRoute element={<RoleManagementPage />} permissionId="role:view" />} />
+      <Route path="/departments" element={<ProtectedRoute element={<DepartmentManagementPage />} permissionId="department:view" />} />
+      <Route path="/coordinators" element={<ProtectedRoute element={<CoordinatorManagementPage />} permissions={['dispatcher:assign', 'coordinator:assign']} requireAll={false} />} />
+      
+      {/* Debug Route */}
+      <Route path="/debug" element={<ProtectedRoute element={<DebugPage />} />} />
       
       {/* Redirect to dashboard if authenticated, otherwise to login */}
       <Route

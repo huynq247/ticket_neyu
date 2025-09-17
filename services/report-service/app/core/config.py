@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     
     @property
     def MONGO_URI(self) -> str:
-        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}"
+        return f"mongodb://{self.MONGO_USER}:{self.MONGO_PASSWORD}@{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}?authSource=admin"
     
     # PostgreSQL Settings
     POSTGRES_SERVER: str

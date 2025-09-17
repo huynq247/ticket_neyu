@@ -31,19 +31,20 @@ function Start-ServiceInNewWindow {
     param (
         [string]$ServiceName,
         [string]$ScriptPath,
+        [string]$ScriptArgs,
         [string]$WindowTitle
     )
     
     Write-Host "Starting $ServiceName in a new window..." -ForegroundColor Yellow
-    Start-Process powershell.exe -ArgumentList "-NoExit -Command `"& {`$Host.UI.RawUI.WindowTitle = '$WindowTitle'; & '$ScriptPath'}`"" -WindowStyle Normal
+    Start-Process powershell.exe -ArgumentList "-NoExit -Command `"& {`$Host.UI.RawUI.WindowTitle = '$WindowTitle'; & '$ScriptPath' $ScriptArgs}`"" -WindowStyle Normal
     Start-Sleep -Seconds 2  # Give a small delay between starting services
 }
 
 # Start User Service
-Start-ServiceInNewWindow -ServiceName "User Service" -ScriptPath "$PSScriptRoot\run_local_py310.ps1 user" -WindowTitle "User Service (8000)"
+Start-ServiceInNewWindow -ServiceName "User Service" -ScriptPath "$PSScriptRoot\run_local_py310.ps1" -ScriptArgs "user" -WindowTitle "User Service (8000)"
 
 # Start Ticket Service
-Start-ServiceInNewWindow -ServiceName "Ticket Service" -ScriptPath "$PSScriptRoot\run_local_py310.ps1 ticket" -WindowTitle "Ticket Service (8001)"
+Start-ServiceInNewWindow -ServiceName "Ticket Service" -ScriptPath "$PSScriptRoot\run_local_py310.ps1" -ScriptArgs "ticket" -WindowTitle "Ticket Service (8001)"
 
 # Start File Service
 Start-ServiceInNewWindow -ServiceName "File Service" -ScriptPath "$PSScriptRoot\run_file_service.ps1" -WindowTitle "File Service (8002)"

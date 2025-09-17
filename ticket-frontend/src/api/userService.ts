@@ -11,11 +11,12 @@ export interface UserFilters {
 }
 
 export interface UpdateUserRequest {
-  username?: string;
-  fullName?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
-  role?: string;
   department?: string;
+  position?: string;
+  phoneNumber?: string;
   isActive?: boolean;
   avatar?: string;
 }
